@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>ejem</title>
+    <script type="text/javascript" src="./xlsx.full.min.js"></script>
+  </head>
+
+  <body>
+    <form id="form" action="index.php" method="post">
+      <input type="text" name="test" />
+    </form>
+    sda<br />
+    <input type="file" id="file" /><br />
+  </body>
+  <script>
+    document.querySelector('#file').addEventListener('change', function () {
+      var form = document.querySelector('#form')
+      var file = document.querySelector('#file').files[0]
+      var type = file.name.split('.')
+      console.log(type[type.length - 1])
+      if (type[type.length - 1] !== 'xlsx' && type[type.length - 1] !== 'xls') {
+        alert('nop')
+        return false
+      }
+      const reader = new FileReader()
+      reader.readAsBinaryString(file)
+      reader.onload = (e) => {
+        const data = e.target.result
+        const zzexcel = window.XLS.read(data, {
+          type: 'binary',
+        })
+        const result = []
+        for (let i = 0; i < zzexcel.SheetNames.length; i++) {
+          const newData = window.XLS.utils.sheet_to_json(
+            zzexcel.Sheets[zzexcel.SheetNames[i]]
+          )
+          console.log(zzexcel.SheetNames)
+          result.push(...newData)
+        }
+        console.log(result)
+        // form.test.value = result
+        // form.submit()
+
+        fetch('http://localhost/dev25/up/index.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(result),
+        })
+          .then((res) => res.json())
+          .then((data) => console.log(data))
+      }
+    })
+  </script>
+</html>
